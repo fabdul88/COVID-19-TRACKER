@@ -4,11 +4,15 @@ import { Card, CardContent } from "@material-ui/core";
 import Dropdown from "./Components/Dropdown/Dropdown";
 import InfoBox from "./Components/InfoBox/InfoBox";
 import Map from "./Components/Map/Map";
+import Table from "./Components/Table/Table";
+import LineGraph from "./Components/LineGraph/LineGraph";
+import { sortData } from "./util";
 
 function App() {
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("worldwide");
   const [countryInfo, setCountryInfo] = useState({});
+  const [tableData, setTableData] = useState([]);
 
   // Fetching all cases worldwide on initial load
   useEffect(() => {
@@ -33,6 +37,9 @@ function App() {
             value: country.countryInfo.iso2,
           }));
           setCountries(countries);
+          // sorting data in the table using utils.js
+          const sortedData = sortData(data);
+          setTableData(sortedData);
         });
     };
     getCountriesData();
@@ -104,8 +111,10 @@ function App() {
         <CardContent>
           <h3>Live Cases by Country</h3>
           {/* Table */}
+          <Table countries={tableData} />
           <h3>Worldwide New Cases</h3>
           {/* Graph */}
+          <LineGraph />
         </CardContent>
       </Card>
     </div>
