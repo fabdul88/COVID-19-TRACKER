@@ -7,12 +7,19 @@ import Map from "./Components/Map/Map";
 import Table from "./Components/Table/Table";
 import LineGraph from "./Components/LineGraph/LineGraph";
 import { sortData } from "./util";
+import "leaflet/dist/leaflet.css";
 
 function App() {
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("worldwide");
   const [countryInfo, setCountryInfo] = useState({});
   const [tableData, setTableData] = useState([]);
+  const [mapCenter, setMapCenter] = useState({
+    lat: 23.65221,
+    lng: -39.781947,
+  });
+  const [mapZoom, setMapZoom] = useState(3);
+  const [mapCountries, setMapCountries] = useState([]);
 
   // Fetching all cases worldwide on initial load
   useEffect(() => {
@@ -39,6 +46,7 @@ function App() {
           setCountries(countries);
           // sorting data in the table using utils.js
           const sortedData = sortData(data);
+          setMapCountries(data);
           setTableData(sortedData);
         });
     };
@@ -64,6 +72,9 @@ function App() {
         setCountry(countryCode);
         // storing the whole countryInfo
         setCountryInfo(data);
+
+        setMapCenter([data.countryInfo.lat, data.countryInfo.lng]);
+        setMapZoom(4);
       });
   };
 
@@ -104,7 +115,7 @@ function App() {
         </div>
 
         {/* Map */}
-        <Map />
+        <Map center={mapCenter} zoom={mapZoom} countries={mapCountries} />
       </div>
 
       <Card className="app__right">
