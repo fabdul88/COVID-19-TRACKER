@@ -1,25 +1,46 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
-import { Card, CardContent } from "@material-ui/core";
+import {
+  Card,
+  CardContent,
+  Paper,
+  Typography,
+  Switch,
+} from "@material-ui/core";
+import { ThemeProvider, createMuiTheme } from "@material-ui/core/styles";
+import { sortData, prettyPrintStat } from "./util";
 import Dropdown from "./Components/Dropdown/Dropdown";
 import InfoBox from "./Components/InfoBox/InfoBox";
 import Map from "./Components/Map/Map";
 import Table from "./Components/Table/Table";
 import LineGraph from "./Components/LineGraph/LineGraph";
-import { sortData } from "./util";
 import "leaflet/dist/leaflet.css";
+import "./App.css";
 
 function App() {
+  const storedDarkMode = localStorage.getItem("DARK_MODE");
+
+  const [darkMode, setDarkMode] = useState(storedDarkMode);
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("worldwide");
   const [countryInfo, setCountryInfo] = useState({});
   const [tableData, setTableData] = useState([]);
-  const [mapCenter, setMapCenter] = useState({
-    lat: 23.65221,
-    lng: -39.781947,
-  });
-  const [mapZoom, setMapZoom] = useState(3);
+  const [mapCenter, setMapCenter] = useState([23.65221, -39.781947]);
+  const [mapZoom, setMapZoom] = useState(2);
   const [mapCountries, setMapCountries] = useState([]);
+  const [casesType, setCasesType] = useState("cases");
+
+  // Light and Dark mode theme
+  const theme = createMuiTheme({
+    palette: {
+      type: darkMode ? "dark" : "light",
+    },
+  });
+  console.log(theme);
+
+  // Persisting Dark and Light mode
+  useEffect(() => {
+    localStorage.setItem("DARK_MODE", darkMode);
+  }, [darkMode]);
 
   // Fetching all cases worldwide on initial load
   useEffect(() => {
@@ -73,62 +94,84 @@ function App() {
         // storing the whole countryInfo
         setCountryInfo(data);
 
-        setMapCenter([data.countryInfo.lat, data.countryInfo.lng]);
-        setMapZoom(4);
+        countryCode === "worldwide"
+          ? setMapCenter([23.65221, -39.781947])
+          : setMapCenter([data.countryInfo.lat, data.countryInfo.long]);
+        setMapZoom(3);
       });
   };
 
   return (
-    <div className="app">
-      <div className="app__left">
-        {/* Header */}
-        <div className="app__header">
-          <h1>COVID-19 TRACKER</h1>
-          <Dropdown
-            countries={countries}
-            country={country}
-            onCountryChange={onCountryChange}
+    <ThemeProvider theme={theme}>
+      <Paper className="app">
+        <div className="app__left">
+          {/* Header */}
+          <div className="app__header">
+            <Typography className="app__name">COVID-19 TRACKER</Typography>
+            <Switch
+              checked={darkMode ? true : false}
+              onChange={() => setDarkMode(!darkMode)}
+            />
+            <Dropdown
+              countries={countries}
+              country={country}
+              onCountryChange={onCountryChange}
+            />
+          </div>
+
+          <div className="app__stats">
+            {/* infoBoxs */}
+            <InfoBox
+              isRed
+              active={casesType === "cases"}
+              onClick={(e) => setCasesType("cases")}
+              title="Coronavirus Cases"
+              cases={prettyPrintStat(countryInfo.todayCases)}
+              total={prettyPrintStat(countryInfo.cases)}
+            />
+
+            {/* infoBoxs */}
+            <InfoBox
+              active={casesType === "recovered"}
+              onClick={(e) => setCasesType("recovered")}
+              title="Recovered"
+              cases={prettyPrintStat(countryInfo.todayRecovered)}
+              total={prettyPrintStat(countryInfo.recovered)}
+            />
+
+            {/* infoBoxs */}
+            <InfoBox
+              isGrey
+              active={casesType === "deaths"}
+              onClick={(e) => setCasesType("deaths")}
+              title="Deaths"
+              cases={prettyPrintStat(countryInfo.todayDeaths)}
+              total={prettyPrintStat(countryInfo.deaths)}
+            />
+          </div>
+
+          {/* Map */}
+          <Map
+            casesType={casesType}
+            center={mapCenter}
+            zoom={mapZoom}
+            countries={mapCountries}
+            darkMode={darkMode}
           />
         </div>
 
-        <div className="app__stats">
-          {/* infoBoxs */}
-          <InfoBox
-            title="Coronavirus Cases"
-            cases={countryInfo.todayCases}
-            total={countryInfo.cases}
-          />
-
-          {/* infoBoxs */}
-          <InfoBox
-            title="Recovered"
-            cases={countryInfo.todayRecovered}
-            total={countryInfo.recovered}
-          />
-
-          {/* infoBoxs */}
-          <InfoBox
-            title="Deaths"
-            cases={countryInfo.todayDeaths}
-            total={countryInfo.deaths}
-          />
-        </div>
-
-        {/* Map */}
-        <Map center={mapCenter} zoom={mapZoom} countries={mapCountries} />
-      </div>
-
-      <Card className="app__right">
-        <CardContent>
-          <h3>Live Cases by Country</h3>
-          {/* Table */}
-          <Table countries={tableData} />
-          <h3>Worldwide New Cases</h3>
-          {/* Graph */}
-          <LineGraph />
-        </CardContent>
-      </Card>
-    </div>
+        <Card className="app__right">
+          <CardContent>
+            <h3>Live Cases by Country</h3>
+            {/* Table */}
+            <Table countries={tableData} />
+            <h3>Worldwide New Cases {casesType}</h3>
+            {/* Graph */}
+            <LineGraph className="app__graph" casesType={casesType} />
+          </CardContent>
+        </Card>
+      </Paper>
+    </ThemeProvider>
   );
 }
 
