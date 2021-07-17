@@ -97,7 +97,7 @@ function App() {
         countryCode === "worldwide"
           ? setMapCenter([23.65221, -39.781947])
           : setMapCenter([data.countryInfo.lat, data.countryInfo.long]);
-        setMapZoom(3);
+        setMapZoom(4);
       });
   };
 
@@ -107,7 +107,7 @@ function App() {
         <div className="app__left">
           {/* Header */}
           <div className="app__header">
-            <Typography className="app__name">COVID-19 TRACKER</Typography>
+            <Typography className="app__name">COVID-19 DASHBOARD</Typography>
             <Switch
               checked={darkMode ? true : false}
               onChange={() => setDarkMode(!darkMode)}
@@ -165,7 +165,7 @@ function App() {
             <h3>Live Cases by Country</h3>
             {/* Table */}
             <Table countries={tableData} />
-            <h3>Worldwide New Cases {casesType}</h3>
+            <h3>Worldwide New {casesType}</h3>
             {/* Graph */}
             <LineGraph className="app__graph" casesType={casesType} />
           </CardContent>

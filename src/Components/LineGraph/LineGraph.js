@@ -2,19 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import numeral from "numeral";
 
-function LineGraph({ casesType = "cases", ...props }) {
-  const [data, setData] = useState({});
-
-  const options = {
+const options = {
+  plugins: {
     legend: {
       display: false,
     },
-    elements: {
-      point: {
-        radius: 0,
-      },
-    },
-    maintainAspectRatio: false,
     tooltips: {
       mode: "index",
       intersect: false,
@@ -24,47 +16,58 @@ function LineGraph({ casesType = "cases", ...props }) {
         },
       },
     },
-    scales: {
-      xAxes: [
-        {
-          type: "time",
-          time: {
-            format: "MM/DD/YY",
-            tooltipFormat: "ll",
-          },
-        },
-      ],
-      yAxes: [
-        {
-          gridLines: {
-            display: false,
-          },
-          ticks: {
-            // Include a dollar sign in the ticks
-            callback: function (value, index, values) {
-              return numeral(value).format("0a");
-            },
-          },
-        },
-      ],
+  },
+  elements: {
+    point: {
+      radius: 0,
     },
-  };
+  },
+  maintainAspectRatio: false,
+  scales: {
+    xAxes: [
+      {
+        type: "time",
+        time: {
+          format: "MM/DD/YY",
+          tooltipFormat: "ll",
+        },
+      },
+    ],
 
-  const buildChartData = (data, casesType) => {
-    let chartData = [];
-    let lastDataPoint;
-    for (let date in data.cases) {
-      if (lastDataPoint) {
-        let newDataPoint = {
-          x: date,
-          y: data[casesType][date] - lastDataPoint,
-        };
-        chartData.push(newDataPoint);
-      }
-      lastDataPoint = data[casesType][date];
+    yAxes: [
+      {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          // Include a dollar sign in the ticks
+          callback: function (value, index, values) {
+            return numeral(value).format("0a");
+          },
+        },
+      },
+    ],
+  },
+};
+
+const buildChartData = (data, casesType) => {
+  let chartData = [];
+  let lastDataPoint;
+  for (let date in data.cases) {
+    if (lastDataPoint) {
+      let newDataPoint = {
+        x: date,
+        y: data[casesType][date] - lastDataPoint,
+      };
+      chartData.push(newDataPoint);
     }
-    return chartData;
-  };
+    lastDataPoint = data[casesType][date];
+  }
+  return chartData;
+};
+
+function LineGraph({ casesType, ...props }) {
+  const [data, setData] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +76,7 @@ function LineGraph({ casesType = "cases", ...props }) {
           return response.json();
         })
         .then((data) => {
-          let chartData = buildChartData(data, "cases");
+          let chartData = buildChartData(data, casesType);
           setData(chartData);
         });
     };

@@ -1,10 +1,15 @@
 import React from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import { showDataOnMap } from "../../util";
 import "./Map.css";
 
 function Map({ casesType, countries, center, zoom, darkMode }) {
-  // console.log(darkMode);
+  function ChangeView({ center, zoom }) {
+    const map = useMap();
+    map.setView(center, zoom);
+    return null;
+  }
+
   return (
     <MapContainer
       center={center}
@@ -12,6 +17,7 @@ function Map({ casesType, countries, center, zoom, darkMode }) {
       casesType={casesType}
       className="map"
     >
+      <ChangeView center={center} zoom={zoom} />
       <TileLayer
         attribution={
           darkMode

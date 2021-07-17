@@ -38,7 +38,7 @@ export const prettyPrintStat = (stat) =>
 
 // draw circles on the map with interactive tooltip
 export const showDataOnMap = (data, casesType = "cases") =>
-  data.map((country) => (
+  data.map((country, index) => (
     <Circle
       center={[country.countryInfo.lat, country.countryInfo.long]}
       fillOpacity={0.4}
@@ -50,6 +50,7 @@ export const showDataOnMap = (data, casesType = "cases") =>
         Math.sqrt(country[casesType] / 10) *
         casesTypeColors[casesType].multiplier
       }
+      key={index}
     >
       <Popup>
         <div className="info-container">
