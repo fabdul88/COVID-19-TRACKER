@@ -35,7 +35,6 @@ function App() {
       type: darkMode ? "dark" : "light",
     },
   });
-  console.log(theme);
 
   // Persisting Dark and Light mode
   useEffect(() => {
